@@ -111,6 +111,15 @@ export class Shelf extends BaseComponent<Attributes, ShelfInstance> {
 		return slots;
 	}
 
+	public getFreeSlot(): number | undefined {
+		for (let i = 0; i < Shelf.MAX_ITEMS; i++) {
+			if (!this.storedItems.has(i)) {
+				return i;
+			}
+		}
+		return undefined;
+	}
+
 	public getEmptySlots(): number[] {
 		const emptySlots: number[] = [];
 		for (let i = 0; i < Shelf.MAX_ITEMS; i++) {
