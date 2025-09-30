@@ -1,6 +1,8 @@
 import { Networking } from "@flamework/networking";
 
-interface ClientToServerEvents {}
+interface ClientToServerEvents {
+	OnEarthKick: (characterCFrame: CFrame) => void;
+}
 
 interface ServerToClientEvents {}
 
