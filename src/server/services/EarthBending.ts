@@ -8,6 +8,9 @@ export class EarthBending implements OnStart {
 		Events.OnEarthKick.connect((player, characterCFrame) => {
 			this.onEarthKick(characterCFrame);
 		});
+		Events.OnEarthWallKick.connect((player, chracterCFrame) => {
+			this.onEarthWallKick(chracterCFrame);
+		});
 	}
 
 	private onEarthKick(characterCFrame: CFrame) {
@@ -29,7 +32,7 @@ export class EarthBending implements OnStart {
 		}
 
 		const earthPart = new Instance("Part");
-		earthPart.Size = new Vector3(6, 20, 6);
+		earthPart.Size = new Vector3(6, 15, 6);
 		earthPart.CFrame = offSetUnderground;
 		earthPart.Anchored = true;
 		earthPart.Material = material;
@@ -49,6 +52,64 @@ export class EarthBending implements OnStart {
 			rock.Material = material;
 			rock.BrickColor = color;
 			rock.CFrame = offSetUnderground.add(new Vector3(math.random(-2, 2), 0, math.random(-2, 2)));
+			rock.Anchored = false;
+			rock.CanCollide = true;
+			rock.Parent = Workspace;
+
+			const bodyForceDirection = characterCFrame.LookVector.add(
+				new Vector3(math.random(-0.2, 0.2), 0.5, math.random(-0.2, 0.2)),
+			).Unit;
+
+			rock.AssemblyLinearVelocity = bodyForceDirection.mul(math.random(10, 18));
+
+			Debris.AddItem(rock, 5);
+		}
+	}
+
+	private onEarthWallKick(characterCFrame: CFrame) {
+		const offSetLookVector = characterCFrame.add(characterCFrame.LookVector.mul(7));
+
+		const raycastParams = new RaycastParams();
+		const raycastResult = Workspace.Raycast(offSetLookVector.Position, new Vector3(0, -5, 0), raycastParams);
+
+		let material: Enum.Material = Enum.Material.Rock;
+		let color: BrickColor = new BrickColor("Brown");
+
+		if (raycastResult) {
+			const hitPart = raycastResult.Instance;
+			material = hitPart.Material;
+			color = new BrickColor(hitPart.Color);
+		}
+
+		const earthPart = new Instance("Part");
+		const underGroundCFrame = offSetLookVector.mul(new CFrame(0, -3, 0));
+		earthPart.Size = new Vector3(5, 5, 5);
+		earthPart.CFrame = underGroundCFrame;
+		earthPart.Anchored = true;
+		earthPart.Material = material;
+		earthPart.BrickColor = color;
+		earthPart.Parent = Workspace;
+
+		const finalOffSet = underGroundCFrame.mul(new CFrame(0, earthPart.Size.Y / 2, 0));
+		const riseTween = TweenService.Create(earthPart, new TweenInfo(0.25), {
+			CFrame: finalOffSet,
+		});
+		riseTween.Play();
+		earthPart.CanCollide = false;
+
+		riseTween.Completed.Once(() => {
+			earthPart.CanCollide = true;
+			earthPart.Anchored = false;
+			earthPart.ApplyImpulse(characterCFrame.LookVector.mul(earthPart.AssemblyMass * 100000));
+		});
+
+		for (let i = 0; i < 6; i++) {
+			const rock = new Instance("Part");
+			rock.Size = new Vector3(math.random(1, 3), math.random(1, 3), math.random(1, 3));
+			rock.Shape = Enum.PartType.Block;
+			rock.Material = material;
+			rock.BrickColor = color;
+			rock.CFrame = offSetLookVector.add(new Vector3(math.random(-2, 2), 0, math.random(-2, 2)));
 			rock.Anchored = false;
 			rock.CanCollide = true;
 			rock.Parent = Workspace;
